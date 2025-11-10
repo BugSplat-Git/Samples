@@ -39,9 +39,11 @@ $BUGSPLAT_CLIENT_SECRET = "your-client-secret"
 
 5. Set the command-line arguments for the project to `/MemoryException`, or one of the other supported arguments from the sample's source code, to test various crashes. To set the command-line arguments, right-click the `MyConsoleCrasher` project and select **Properties > Debugging > Command Arguments**.
 
+<img width="1536" height="1059" alt="Visual Studio Project Properties" src="https://github.com/user-attachments/assets/11fee98f-22da-4e27-8ad4-2dece5b19d97" />
+
 6. Rebuild the project and run it outside of the Visual Studio debugger (Ctrl+F5). This is important since the debugger interferes with the BugSplat library's exception handling. You should see a dialog such as that shown below:
 
-![BugSplat Crash Dialog](https://docs.bugsplat.com/.gitbook/assets/bugsplat-crash-dialog.png)
+<img width="800" height="772" alt="BugSplat Crash Dialog" src="https://github.com/user-attachments/assets/10895f33-00a8-4613-9e71-3547283e0e6e" />
 
 7. Enter some descriptive text to help you identify the crash you are about to upload. Click the `Send Error Report` button, and voilà! The report will be sent! In the BugSplat web app, look for the crash report with the description you entered.
 
@@ -104,7 +106,8 @@ Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Windows Error Reporting\R
 
 Here is that value shown highlighted in the registry editor for one of our sample applications:
 
-![WER Registry Configuration](https://docs.bugsplat.com/.gitbook/assets/wer-registry-configuration.png)
+<img width="1530" height="662" alt="BugSplat WER Registry Settings" src="https://github.com/user-attachments/assets/9ea6f3e7-7244-49f1-a524-c92c5fd33152" />
+
 
 By default, WER will stop creating crash dumps after it has seen a few of the same type. To disable this, create the following registry key:
 
@@ -121,7 +124,8 @@ Add the following values under the new key you created:
 
 Here's an example of this shown in the registry editor:
 
-![LocalDumps Registry Configuration](https://docs.bugsplat.com/.gitbook/assets/localdumps-registry-configuration.png)
+<img width="1532" height="246" alt="LocalDumps Registry Configuration" src="https://github.com/user-attachments/assets/dac8ec1e-3b17-486a-9e41-93d49bee15f7" />
+
 
 For additional information, see [Windows Error Reporting Settings](https://learn.microsoft.com/en-us/windows/win32/wer/wer-settings)
 
@@ -135,9 +139,9 @@ Test your application by forcing a crash.
 
 Verify that the BugSplat dialog appears, and that crashes are posted to your BugSplat account. Ensure that symbol names in the call stack are resolved correctly. If they aren't, double-check that the correct version of symbol files and all executables for your application have been uploaded to BugSplat.
 
-If everything was configured correctly, you should see a crash report that looks like this in your BugSplat database.
+If everything is configured correctly, you should see a crash report that resembles this one in your BugSplat database.
 
-![BugSplat Crash Page](https://docs.bugsplat.com/.gitbook/assets/bugsplat-crash-page.png)
+<img width="1536" height="859" alt="BugSplat Crash Page" src="https://github.com/user-attachments/assets/5d2f95de-1454-4e62-ac16-05c932da3491" />
 
 ### Crash Dialog
 
