@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36221.1 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyConsoleCrasher", "Samples\MyConsoleCrasher\MyConsoleCrasher.vcxproj", "{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Debug|ARM64.Build.0 = Debug|ARM64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Debug|x64.ActiveCfg = Debug|x64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Debug|x64.Build.0 = Debug|x64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Release|ARM64.ActiveCfg = Release|ARM64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Release|ARM64.Build.0 = Release|ARM64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Release|x64.ActiveCfg = Release|x64
+		{260C5E1E-24BE-4BFA-AA5A-D5D9D6BFA1EB}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3C41EB7E-D36F-44DE-8158-6C7B6A12805D}
+	EndGlobalSection
+EndGlobal

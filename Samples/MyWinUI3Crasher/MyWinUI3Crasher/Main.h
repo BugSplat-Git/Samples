@@ -1,0 +1,3 @@
+#define BUGSPLAT_DATABASE L"fred"
+#define APPLICATION_NAME L"MyWinUI3Crasher"
+#define APPLICATION_VERSION L"1.0.0"

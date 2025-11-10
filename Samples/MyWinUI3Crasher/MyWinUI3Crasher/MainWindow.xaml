@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="MyWinUI3Crasher.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MyWinUI3Crasher"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="MyWinUI3Crasher - BugSplat Crash Examples">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="BugSplat WinUI 3 Crash Examples" 
+                   FontSize="24" 
+                   FontWeight="Bold" 
+                   HorizontalAlignment="Center" 
+                   Margin="0,10,0,20"
+                   Grid.Row="0"/>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column -->
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="Common Crashes" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <Button x:Name="MemoryExceptionButton" Content="Memory Exception" HorizontalAlignment="Stretch" Click="MemoryExceptionButton_Click"/>
+                <Button x:Name="DivideByZeroButton" Content="Divide By Zero" HorizontalAlignment="Stretch" Click="DivideByZeroButton_Click"/>
+                <Button x:Name="StackOverflowButton" Content="Stack Overflow" HorizontalAlignment="Stretch" Click="StackOverflowButton_Click"/>
+                <Button x:Name="ThrowButton" Content="Throw C++ Exception" HorizontalAlignment="Stretch" Click="ThrowButton_Click"/>
+                <Button x:Name="VectorOutOfBoundsButton" Content="Vector Out of Bounds" HorizontalAlignment="Stretch" Click="VectorOutOfBoundsButton_Click"/>
+
+                <TextBlock Text="Memory Corruption" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                <Button x:Name="UseAfterFreeButton" Content="Use After Free" HorizontalAlignment="Stretch" Click="UseAfterFreeButton_Click"/>
+                <Button x:Name="DoubleDeleteButton" Content="Double Delete" HorizontalAlignment="Stretch" Click="DoubleDeleteButton_Click"/>
+                <Button x:Name="HeapCorruptionButton" Content="Heap Corruption (ASAN builds only)" HorizontalAlignment="Stretch" Click="HeapCorruptionButton_Click"/>
+                <Button x:Name="StackOverrunButton" Content="Stack Overrun" HorizontalAlignment="Stretch" Click="StackOverrunButton_Click"/>
+
+                <TextBlock Text="Advanced Features" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                <Button x:Name="SEHButton" Content="Custom SEH Exception" HorizontalAlignment="Stretch" Click="SEHButton_Click"/>
+                <Button x:Name="CreateXmlReportButton" Content="Create XML Report" HorizontalAlignment="Stretch" Click="CreateXmlReportButton_Click"/>
+            </StackPanel>
+
+            <!-- Right Column -->
+            <StackPanel Grid.Column="2" Spacing="8">
+                <TextBlock Text="System-Level Crashes" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <Button x:Name="PrivilegedInstructionButton" Content="Privileged Instruction" HorizontalAlignment="Stretch" Click="PrivilegedInstructionButton_Click"/>
+                <Button x:Name="InvalidFunctionPointerButton" Content="Invalid Function Pointer" HorizontalAlignment="Stretch" Click="InvalidFunctionPointerButton_Click"/>
+                <Button x:Name="FastFailButton" Content="Fast Fail" HorizontalAlignment="Stretch" Click="FastFailButton_Click"/>
+                <Button x:Name="InvalidParametersButton" Content="Invalid Parameters" HorizontalAlignment="Stretch" Click="InvalidParametersButton_Click"/>
+                <Button x:Name="PureVirtualButton" Content="Pure Virtual Call" HorizontalAlignment="Stretch" Click="PureVirtualButton_Click"/>
+                <Button x:Name="ApplicationHangButton" Content="Application Hang" HorizontalAlignment="Stretch" Click="ApplicationHangButton_Click"/>
+
+                <TextBlock Text="Threading" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                <Button x:Name="ThreadButton" Content="Thread Exception" HorizontalAlignment="Stretch" Click="ThreadButton_Click"/>
+
+                <TextBlock Text="Other Crashes" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                <Button x:Name="AbortButton" Content="Call abort()" HorizontalAlignment="Stretch" Click="AbortButton_Click"/>
+                <Button x:Name="OutOfMemoryButton" Content="Exhaust Memory" HorizontalAlignment="Stretch" Click="OutOfMemoryButton_Click"/>
+                
+                <!-- BugSplat Logo at bottom of column -->
+                <Image x:Name="BugSplatLogo" 
+                       Source="ms-appx:///Images/bugsplat-logo.jpg" 
+                       Stretch="Uniform" 
+                       MaxHeight="100" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,20,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
