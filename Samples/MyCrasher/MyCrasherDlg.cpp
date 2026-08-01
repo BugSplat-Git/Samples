@@ -7,6 +7,8 @@
 #include "shlwapi.h"
 #include "MyCrasher.h"
 #include "MyCrasherDlg.h"
+#include "UserFeedbackDlg.h"
+#include <vector>
 #include <fpieee.h>
 #include <excpt.h>
 #include <float.h>
@@ -46,6 +48,7 @@ BEGIN_MESSAGE_MAP(CMyCrasherDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_PROBLEMCOMBO, OnCbnSelchangeProblemcombo)
 	ON_BN_CLICKED(IDC_SENDADDITIONALFILES, OnBnClickedSendadditionalfiles)
 	ON_BN_CLICKED(IDC_CHK_ENABLEHANGDETECT, OnBnClickedChkEnableHangDetect)
+	ON_BN_CLICKED(IDC_USERFEEDBACK, OnBnClickedUserFeedback)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -118,7 +121,93 @@ HCURSOR CMyCrasherDlg::OnQueryDragIcon()
 
 void CMyCrasherDlg::OnCreateReport()
 {
-	g_BugSplat->GenerateDump((EXCEPTION_POINTERS*)NULL);
+	const __wchar_t* xml = L"<report><process>"
+		"<exception>"
+		"<code>FATAL ERROR</code>"
+		"<explanation>This is an error code explanation</explanation>"
+		"<func><![CDATA[MyConsoleCrasher!MemoryException]]></func>"
+		"<file>/www/bugsplatAutomation/MyConsoleCrasher/MyConsoleCrasher.cpp</file>"
+		"<line>143</line>"
+		"<registers>"
+		"<cs>0023</cs>"
+		"<ds>002b</ds>"
+		"<eax>00000011</eax>"
+		"<ebp>00affb58</ebp>"
+		"<ebx>00858000</ebx>"
+		"<ecx>43bf1e0e</ecx>"
+		"<edi>00affb58</edi>"
+		"<edx>014480b4</edx>"
+		"<efl>00010202</efl>"
+		"</registers>"
+		"</exception>"
+		"<modules numloaded=\"2\">"
+		"<module>"
+		"<name>MyConsoleCrasher</name>"
+		"<order>1</order>"
+		"<address>01320000-01457000</address>"
+		"<path>C:/www/BugsplatAutomation/BugsplatAutomation/bin/x64/Release/temp/BugSplat/bin/MyConsoleCrasher.exe</path>"
+		"<symbolsloaded>deferred</symbolsloaded>"
+		"<fileversion/>"
+		"<productversion/>"
+		"<checksum>00000000</checksum>"
+		"<timedatestamp>SatJun1501:18:092019</timedatestamp>"
+		"</module>"
+		"<module>"
+		"<name>BugSplatRc</name>"
+		"<order>2</order>"
+		"<address>01320000-01457000</address>"
+		"<path>C:/www/BugsplatAutomation/BugsplatAutomation/bin/x64/Release/BugSplatRc.dll</path>"
+		"<symbolsloaded>deferred</symbolsloaded>"
+		"<fileversion/>"
+		"<productversion/>"
+		"<checksum>00000000</checksum>"
+		"<timedatestamp>SatJun1501:18:092019</timedatestamp>"
+		"</module>"
+		"</modules>"
+		"<threads count=\"2\">"
+		"<thread id=\"0\" current=\"yes\" event=\"yes\" framecount=\"3\">"
+		"<frame>"
+		"<symbol><![CDATA[MyConsoleCrasher!MemoryException]]></symbol>"
+		"<file>/www/bugsplatAutomation/MyConsoleCrasher/MyConsoleCrasher.cpp</file>"
+		"<line>143</line>"
+		"<offset>0x35</offset>"
+		"</frame>"
+		"<frame>"
+		"<symbol><![CDATA[MyConsoleCrasher!wmain]]></symbol>"
+		"<file>C:/www/BugsplatAutomation/BugsplatAutomation/BugSplat/samples/MyConsoleCrasher/MyConsoleCrasher.cpp</file>"
+		"<line>83</line>"
+		"<offset>0x239</offset>"
+		"</frame>"
+		"<frame>"
+		"<symbol><![CDATA[MyConsoleCrasher!__scrt_wide_environment_policy::initialize_environment]]></symbol>"
+		"<file>d:/agent/_work/4/s/src/vctools/crt/vcstartup/src/startup/exe_common.inl</file>"
+		"<line>90</line>"
+		"<offset>0x43</offset>"
+		"</frame>"
+		"</thread>"
+		"<thread id=\"1\" current=\"no\" event=\"no\" framecount=\"3\">"
+		"<frame>"
+		"<symbol><![CDATA[my2ConsoleCrasher!MemoryException]]></symbol>"
+		"<file>/www/bugsplatAutomation/MyConsoleCrasher/MyConsoleCrasher.cpp</file>"
+		"<line>143</line>"
+		"<offset>0x35</offset>"
+		"</frame>"
+		"<frame>"
+		"<symbol><![CDATA[my2ConsoleCrasher!wmain]]></symbol>"
+		"<file>C:/www/BugsplatAutomation/BugsplatAutomation/BugSplat/samples/MyConsoleCrasher/MyConsoleCrasher.cpp</file>"
+		"<line>83</line>"
+		"<offset>0x239</offset>"
+		"</frame>"
+		"<frame>"
+		"<symbol><![CDATA[my2ConsoleCrasher!__scrt_wide_environment_policy::initialize_environment]]></symbol>"
+		"<file>d:/agent/_work/4/s/src/vctools/crt/vcstartup/src/startup/exe_common.inl</file>"
+		"<line>90</line>"
+		"<offset>0x43</offset>"
+		"</frame>"
+		"</thread>"
+		"</threads></process></report>";	
+	
+	g_BugSplat->CreateXmlReport(xml);
 }
 
 // ******************************************************************************
@@ -146,6 +235,40 @@ void StackOverflow(int depth)
 #pragma warning (default : 4717)
 #pragma warning (default: 4748)
 
+void GenerateMemoryException()
+{
+	// Dereference null pointer
+	*(int*)0 = 0;
+}
+
+void GenerateStackOverflow()
+{
+	StackOverflow(0);
+}
+
+void GenerateDivideByZero()
+{
+	int x, y;
+	x = 5;
+	y = 0;
+	int nRes = x / y;
+}
+
+void GenerateApplicationHang()
+{
+	// Infinite loop that causes hang
+	for (int i = 0; i < 1000; i++)
+	{
+		if (i == 10)
+			i = 0;
+		Sleep(10);
+	}
+}
+
+void GenerateAbort()
+{
+	abort();
+}
 
 void CMyCrasherDlg::OnSimulateProblem()
 {
@@ -154,41 +277,24 @@ void CMyCrasherDlg::OnSimulateProblem()
 	switch (nIndex)
 	{
 	case 1:// generate Memory Exception			
-	{
-		*(int*)0 = 0;
-	}
-	break;
+		GenerateMemoryException();
+		break;
 
 	case 2:// generate Stack Overflow
-	{
-		StackOverflow(0);
-	}
-	break;
+		GenerateStackOverflow();
+		break;
 
 	case 3:// generate Int DivByZero error
-	{
-		int x, y;
-		x = 5;
-		y = 0;
-		int nRes = x / y;
-	}
-	break;
+		GenerateDivideByZero();
+		break;
 
 	case 4://generate an application hang
-	{
-		for (int i = 0; i < 1000; i++)
-		{
-			if (i == 10)
-				i = 0;
-			Sleep(10);
-		}
-	}
-	break;
-	case 5: //generate pure virtual function call
-	{
-		abort();
-	}
-	break;
+		GenerateApplicationHang();
+		break;
+
+	case 5: //generate abort
+		GenerateAbort();
+		break;
 	}
 }
 
@@ -265,11 +371,32 @@ void CMyCrasherDlg::OnBnClickedChkEnableHangDetect()
 {
 	CButton* pBtn = (CButton*)GetDlgItem(IDC_CHK_ENABLEHANGDETECT);
 	if (pBtn->GetCheck() == 0)
-	{ 
+	{
 		g_BugSplat->SetHangDetectionTimeout(0); // Disable hang detection
 	}
 	else
-	{ 
-		g_BugSplat->SetHangDetectionTimeout(5000); // Enable hang detection, timeout after 5 seconds 
+	{
+		g_BugSplat->SetHangDetectionTimeout(5000); // Enable hang detection, timeout after 5 seconds
+	}
+}
+
+
+void CMyCrasherDlg::OnBnClickedUserFeedback()
+{
+	CUserFeedbackDlg dlg(this);
+
+	if (dlg.DoModal() == IDOK)
+	{
+		if (dlg.m_strAttachmentPath.IsEmpty())
+		{
+			g_BugSplat->PostFeedback(dlg.m_strTitle, dlg.m_strDescription);
+		}
+		else
+		{
+			std::vector<const wchar_t*> attachments = { (LPCTSTR)dlg.m_strAttachmentPath };
+			g_BugSplat->PostFeedback(dlg.m_strTitle, dlg.m_strDescription, attachments);
+		}
+
+		MessageBox(L"User feedback sent to BugSplat!", L"Feedback Sent", MB_OK | MB_ICONINFORMATION);
 	}
 }

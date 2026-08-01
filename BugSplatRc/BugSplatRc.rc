@@ -10,6 +10,9 @@
 #include "afxres.h"
 #include "resBugSplatRc.h"
 
+#define VER_FILE_VERSION 7,0,0,0
+#define VER_PRODUCT_VERSION VER_FILE_VERSION
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -186,8 +189,8 @@ IDC_CRASHDLGHEADER      BITMAP                  "res\\crashDlgHeader.bmp"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,0,1,0
- PRODUCTVERSION 7,0,1,0
+ FILEVERSION VER_FILE_VERSION
+ PRODUCTVERSION VER_PRODUCT_VERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -203,13 +206,13 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "BugSplat"
-            VALUE "FileDescription", "Crash reporting module, BugSplatRc"
-            VALUE "FileVersion", "7.0.1.0"
+            VALUE "FileDescription", "BugSplat Dialog Resource File"
+            VALUE "FileVersion", VER_FILE_VERSION
             VALUE "InternalName", "BugSplatRc"
             VALUE "LegalCopyright", "Copyright BugSplat, LLC (C)"
-            VALUE "OriginalFilename", "BugSplatRc.DLL"
+            VALUE "OriginalFilename", "BugSplatRc.dll"
             VALUE "ProductName", "BugSplatRc Dynamic Link Library"
-            VALUE "ProductVersion", "7.0.1.0"
+            VALUE "ProductVersion", VER_FILE_VERSION
         END
     END
     BLOCK "VarFileInfo"
