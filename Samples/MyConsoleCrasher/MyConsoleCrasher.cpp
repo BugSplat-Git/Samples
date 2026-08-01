@@ -1,4 +1,4 @@
-﻿//
+//
 //        This sample project illustrates how to capture crashes (unhandled exceptions) in native Windows applications using BugSplat.
 //
 //		  To build this sample:
@@ -30,6 +30,7 @@
 #include "MyConsoleCrasher.h"
 #include "BugSplat.h"
 #include <mutex>
+#include <WerApi.h>
 
 // An example ASSERT macro.  Adds an additional frame to the top of the stack allowing you to easily distinguish between asserts 
 // in the same function, without relying on line numbers. 
@@ -75,8 +76,12 @@ void UseAfterFree();
 void InvalidFunctionPointer();
 void FastFail();
 void CreateXmlReport();
+void CollectUserFeedback();
 bool AddAttachments();
+
+std::mutex GlobalExceptionFilterMutex;
 extern "C" LONG WINAPI GlobalExceptionFilter(LPEXCEPTION_POINTERS const exceptionPointers);
+bool GetModulePathInExeDirectory(const wchar_t* moduleName, wchar_t* outPath, DWORD outPathSize);
 
 BugSplat g_BugSplat(BUGSPLAT_DATABASE, APPLICATION_NAME, APPLICATION_VERSION);
 
@@ -104,6 +109,7 @@ int wmain(int argc, wchar_t **argv)
 		wprintf(L"\t/PureVirtual - Causes a pure virtual function call exception\n");
 		wprintf(L"\t/SEH - Causes and recovers from a custom SEH exception\n");
 		wprintf(L"\t/CreateXmlReport - Creates and sends an xml report to BugSplat\n");
+		wprintf(L"\t/UserFeedback - Sends user feedback to BugSplat via PostFeedback\n");
 
 		wprintf(L"\nThe following crash types require BugSplat WER integration to be enabled via registry settings:\n\n");
 		wprintf(L"\t/StackOverrun - Causes a stack overrun exception\n");
@@ -127,8 +133,22 @@ int wmain(int argc, wchar_t **argv)
 		wprintf(L"\n!!!Warning: BugSplat WER is not configured.  Some crashes will not be handled by BugSplat!!!\n\n");
 	}
 
-	wprintf(L"BugSplat MyConsoleCrasher Sample Application. Press any key to continue\n");
-	wchar_t ch = _getwch();
+	bool quietMode = false;
+	for (int i = 1; i < argc; i++) {
+		if (!_wcsicmp(argv[i], L"/Quiet")) {
+			// Don't let the BugSplat dialog appear
+			quietMode = true;
+			g_BugSplat.SetQuietMode(true);
+		}
+	}
+
+	if (!quietMode)
+	{
+		wprintf(L"BugSplat MyConsoleCrasher Sample Application. Press any key to continue\n");
+		wchar_t ch = _getwch();
+	}
+
+	g_BugSplat.PostAllCrashesAsync();
 
 	// The following calls add support for collecting crashes for abort(), vectored exceptions, out of memory,
 	// pure virtual function calls, and for invalid parameters for OS functions.
@@ -154,104 +174,117 @@ int wmain(int argc, wchar_t **argv)
 	// Add attachments to the crash report
 	AddAttachments();
 
-	for (int i = 1; i < argc; i++) {
-		if (!_wcsicmp(argv[i], L"/Quiet")) {
-			// Don't let the BugSplat dialog appear
-			g_BugSplat.SetQuietMode(true);
-		}
-	}
-
 	// Force a crash, in a variety of ways
 	for (int i = 1; i < argc; i++) {
 
 		if (!_wcsicmp(argv[i], L"/AssertTests")) {
+			g_BugSplat.SetUserDescription(L"Testing AssertTests crash");
 			AssertTests();
 		}
 
 		if (!_wcsicmp(argv[i], L"/MemoryException")) {
+			g_BugSplat.SetUserDescription(L"Testing MemoryException crash");
 			MemoryException();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/StackOverflow")) {
+			g_BugSplat.SetUserDescription(L"Testing StackOverflow crash");
 			StackOverflow(NULL);
 		}
 
 		else if (!_wcsicmp(argv[i], L"/StackOverrun")) {
+			g_BugSplat.SetUserDescription(L"Testing StackOverrun crash");
 			StackOverrun();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/PrivilegedInstruction")) {
+			g_BugSplat.SetUserDescription(L"Testing PrivilegedInstruction crash");
 			PrivilegedInstruction();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/DoubleDelete")) {
+			g_BugSplat.SetUserDescription(L"Testing DoubleDelete crash");
 			DoubleDelete();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/UseAfterFree")) {
+			g_BugSplat.SetUserDescription(L"Testing UseAfterFree crash");
 			UseAfterFree();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/InvalidFunctionPointer")) {
+			g_BugSplat.SetUserDescription(L"Testing InvalidFunctionPointer crash");
 			InvalidFunctionPointer();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/FastFail")) {
+			g_BugSplat.SetUserDescription(L"Testing FastFail crash");
 			FastFail();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/DivByZero")) {
+			g_BugSplat.SetUserDescription(L"Testing DivByZero crash");
 			DivideByZero();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/OutOfMemory")) {
+			g_BugSplat.SetUserDescription(L"Testing OutOfMemory crash");
 			ExhaustMemory();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/Throw")) {
+			g_BugSplat.SetUserDescription(L"Testing Throw crash");
 			ThrowByUser();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/Thread")) {
+			g_BugSplat.SetUserDescription(L"Testing Thread crash");
 			ThreadException(1);
 		}
 
 		else if (!_wcsicmp(argv[i], L"/MultipleThreads")) {
+			g_BugSplat.SetUserDescription(L"Testing MultipleThreads crash");
 			ThreadException(10);
 		}
 
 		else if (!_wcsicmp(argv[i], L"/Abort")) {
+			g_BugSplat.SetUserDescription(L"Testing Abort crash");
 			CallAbort();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/Asan")) {
+			g_BugSplat.SetUserDescription(L"Testing Asan/HeapCorruption crash");
 			HeapCorruption();	// / Generally this error goes undetected if Asan is not enabled
 		}
 
 		else if (!_wcsicmp(argv[i], L"/VectorOutOfBounds")) {
+			g_BugSplat.SetUserDescription(L"Testing VectorOutOfBounds crash");
 			OutOfBoundsVectorCrash();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/InvalidParameters")) {
+			g_BugSplat.SetUserDescription(L"Testing InvalidParameters crash");
 			InvalidParameters();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/PureVirtual")) {
+			g_BugSplat.SetUserDescription(L"Testing PureVirtual crash");
 			VirtualFunctionCallCrash();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/StdException")) {
+			g_BugSplat.SetUserDescription(L"Testing StdException crash");
 			StdException();
 		}
 
 		else if (!_wcsicmp(argv[i], L"/SEH")) {
 
-			g_BugSplat.SetUserDescription(_T("BugSplat ALERT - execution continues!"));
 
 			for (int i = 0; i < 3; i++) {
+				g_BugSplat.SetUserDescription(_T("BugSplat ALERT - execution continues!"));
 				CustomSEHException();
 				wprintf(L"Recovered from SEH exception %d\n", i + 1);
-				Sleep(1000);
+				Sleep(3000);
 			}
 			wprintf(L"Application normal exit.\n");
 			return 0;
@@ -261,12 +294,17 @@ int wmain(int argc, wchar_t **argv)
 
 			for (int i = 0; i < 3; i++)
 			{
+				g_BugSplat.SetUserDescription(L"Testing CreateXmlReport");
 				CreateXmlReport();
 				wprintf(L"Sent report %d\n", i + 1);
-				Sleep(1000);
+				Sleep(3000);
 			}
 			wprintf(L"Application normal exit.\n");
 			return 0;
+		}
+
+		else if (!_wcsicmp(argv[i], L"/UserFeedback")) {
+			CollectUserFeedback();
 		}
 	}
 
@@ -310,7 +348,7 @@ void PrivilegedInstruction()
 {
 	// Try to execute a privileged instruction from user mode
 	wprintf(L"PrivilegedInstruction!\n");
-#if _M_AMD64
+#if defined(_M_AMD64) || defined(_M_IX86)
 	__halt();
 #else
 	__hlt(0);
@@ -363,7 +401,7 @@ void DoubleDelete()
 }
 
 void FastFail()
-{
+ {
 	// Requires BugSplat WER integration to be enabled
 	wprintf(L"FastFail!\n");
 	__fastfail(1);
@@ -485,6 +523,7 @@ DWORD SEHFilterFunction(EXCEPTION_POINTERS* exp)
 	g_BugSplat.SetQuietMode(true); // Allows BugSplat to continue monitoring after the exception
 	g_BugSplat.GenerateDump(exp, MiniDumpNormal);
 	g_BugSplat.PostCrash();
+	Sleep(2000); // Sleep to avoid IP throttling
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -560,6 +599,22 @@ void HeapCorruption()
 
 		}
 	}
+}
+
+void CollectUserFeedback()
+{
+	// Example: send user feedback to BugSplat without crashing
+	g_BugSplat.SetUser(L"Jane Doe");
+	g_BugSplat.SetEmail(L"jane@bugsplat.com");
+
+	wprintf(L"\nSending user feedback to BugSplat...\n");
+
+	bool success = g_BugSplat.PostFeedback(
+		L"Save project issue",
+		L"The application froze for several seconds while I was saving my project."
+	);
+
+	wprintf(L"Feedback %s.\n", success ? L"sent successfully" : L"failed to send");
 }
 
 void CreateXmlReport()
@@ -687,6 +742,9 @@ bool AddAttachments()
 //
 extern "C" LONG WINAPI GlobalExceptionFilter(LPEXCEPTION_POINTERS const exceptionPointers)
 {
+	// Ensure only one thread is in the exception filter at a time
+	std::lock_guard<std::mutex> lock(GlobalExceptionFilterMutex);
+
 	// Required for handling out-of-memory errors
 	g_BugSplat.FreeGuardMemory();
 
@@ -698,4 +756,32 @@ extern "C" LONG WINAPI GlobalExceptionFilter(LPEXCEPTION_POINTERS const exceptio
 
 	// Exit the program.
 	exit(123);
+}
+
+// Returns the path to a DLL located in the same directory as the current executable
+bool GetModulePathInExeDirectory(const wchar_t* moduleName, wchar_t* outPath, DWORD outPathSize)
+{
+	// Get the full path to the current executable
+	DWORD len = GetModuleFileNameW(NULL, outPath, outPathSize);
+	if (len == 0 || len >= outPathSize)
+	{
+		return false;
+	}
+
+	// Find the last backslash to get the directory
+	wchar_t* lastSlash = wcsrchr(outPath, L'\\');
+	if (!lastSlash)
+	{
+		return false;
+	}
+
+	// Truncate after the backslash and append the module name
+	*(lastSlash + 1) = L'\0';
+	if (wcslen(outPath) + wcslen(moduleName) >= outPathSize)
+	{
+		return false;
+	}
+	wcscat_s(outPath, outPathSize, moduleName);
+
+	return true;
 }

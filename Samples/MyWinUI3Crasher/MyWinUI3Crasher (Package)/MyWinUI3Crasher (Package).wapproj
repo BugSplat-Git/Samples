@@ -44,19 +44,35 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\BugSplatMonitor.exe">
+    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\bin\BugSplatMonitor.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>BugSplatMonitor.exe</Link>
     </Content>
-    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\BugSplatRc.dll">
+    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\bin\BugSplatRc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>BugSplatRc.dll</Link>
     </Content>
-    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\BugSplatWer.dll">
+    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\bin\BugSplatWer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>BugSplatWer.dll</Link>
     </Content>
-    <Content Include="Images\bugsplat-logo.jpg" />
+    <!-- Bundled sample log (source lives in the app project); packaged at Assets\sample.log
+         and attached to user feedback when the "Include logs" toggle is on. -->
+    <Content Include="..\MyWinUI3Crasher\Assets\sample.log">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Assets\sample.log</Link>
+    </Content>
+    <!-- Window/taskbar icon (the BugSplat bug), set at runtime via AppWindow.SetIcon. -->
+    <Content Include="..\MyWinUI3Crasher\Assets\bugsplat.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Assets\bugsplat.ico</Link>
+    </Content>
+    <Content Include="Images\bugsplat-logo.png" />
+    <!-- Per-event splat icons (ported from the bugsplat-android example) -->
+    <Content Include="Images\splat_crash.png" />
+    <Content Include="Images\splat_error.png" />
+    <Content Include="Images\splat_feedback.png" />
+    <Content Include="Images\splat_hang.png" />
     <Content Include="Images\SplashScreen.scale-200.png" />
     <Content Include="Images\LockScreenLogo.scale-200.png" />
     <Content Include="Images\Square150x150Logo.scale-200.png" />
@@ -78,7 +94,7 @@
   <Target Name="CopyBugSplatFilesToAppX" AfterTargets="_CopyFilesToLayoutDir;_GenerateCurrentProjectAppxManifest" BeforeTargets="_GenerateAppxPackageRecipeFile">
     <PropertyGroup>
       <AppXLayoutDir>$(OutDir)AppX\</AppXLayoutDir>
-      <BugSplatSourceDir>..\..\..\BugSplat\x64\$(Configuration)\</BugSplatSourceDir>
+      <BugSplatSourceDir>..\..\..\BugSplat\x64\$(Configuration)\bin\</BugSplatSourceDir>
     </PropertyGroup>
     <ItemGroup>
       <BugSplatFiles Include="$(BugSplatSourceDir)BugSplatMonitor.exe" />

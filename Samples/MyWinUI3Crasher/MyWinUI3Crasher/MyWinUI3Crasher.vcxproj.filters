@@ -25,6 +25,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\sample.log">
+      <Filter>Assets</Filter>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
