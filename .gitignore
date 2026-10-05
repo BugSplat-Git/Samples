@@ -1,2 +1,28 @@
 .vs
-*.vcxproj.user
+*.user
+
+# NuGet packages restored for MyWinUI3Crasher
+packages/
+
+# Build output
+Samples/**/x64/
+Samples/**/ARM64/
+Samples/**/Win32/
+Samples/**/Debug/
+Samples/**/Release/
+Samples/**/bin/
+Samples/**/obj/
+Samples/**/Generated Files/
+Samples/**/AppPackages/
+Samples/**/BundleArtifacts/
+
+# The samples build into the SDK's folders next to the BugSplat runtime
+BugSplat/*/*/MyWinUI3Crasher/
+BugSplat/*/*/bin/MyConsoleCrasher.*
+BugSplat/*/*/bin/MyCrasher.*
+
+# Downloaded by Tools\Get-SymbolUpload.ps1 on the first build
+Tools/symbol-upload-windows.exe
+
+# Your BugSplat Client ID and Secret
+**/Scripts/env.ps1

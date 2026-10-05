@@ -1,0 +1,13 @@
+<Project>
+  <!-- Build steps for every sample in this repo. -->
+
+  <!-- Projects with a Scripts\SymbolUpload.ps1 run Tools\symbol-upload-windows.exe after they build.
+       The exe isn't checked in, so download it first; Tools\Get-SymbolUpload.ps1 pins the version.
+       Skipped when the upload is turned off (BugSplatSymbolUpload=false for the WPF sample,
+       PostBuildEventUseInBuild=false for the C++ ones), so offline builds still work. -->
+  <Target Name="BugSplatGetSymbolUpload"
+          BeforeTargets="PrepareForBuild"
+          Condition="Exists('$(MSBuildProjectDirectory)\Scripts\SymbolUpload.ps1') and '$(BugSplatSymbolUpload)' != 'false' and '$(PostBuildEventUseInBuild)' != 'false'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Tools\Get-SymbolUpload.ps1&quot;" />
+  </Target>
+</Project>

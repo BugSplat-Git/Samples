@@ -2,6 +2,9 @@
 
 #include "MainWindow.g.h"
 
+#include <set>
+#include <string>
+
 namespace winrt::MyWinUI3Crasher::implementation
 {
     struct MainWindow : MainWindowT<MainWindow>
@@ -11,27 +14,41 @@ namespace winrt::MyWinUI3Crasher::implementation
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
-        // Click handlers for crash buttons
-        void MemoryExceptionButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void DivideByZeroButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void StackOverflowButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void ThrowButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void VectorOutOfBoundsButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void UseAfterFreeButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void DoubleDeleteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void HeapCorruptionButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void StackOverrunButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void PrivilegedInstructionButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void InvalidFunctionPointerButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void FastFailButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void InvalidParametersButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void PureVirtualButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void ApplicationHangButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void ThreadButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void AbortButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void OutOfMemoryButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void SEHButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
-        void CreateXmlReportButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        // Event-card click handlers (wired in MainWindow.xaml)
+        winrt::fire_and_forget CrashCard_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void NonCrashErrorCard_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        winrt::fire_and_forget UserFeedbackCard_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void HangCard_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void ViewDashboard_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+
+    private:
+        // ---- Feedback dialog (two-state form / thank-you) ----
+        winrt::Windows::Foundation::IAsyncAction ShowFeedbackDialogAsync();
+
+        // ---- Crash-types sheet ----
+        winrt::Windows::Foundation::IAsyncAction ShowCrashSheetAsync();
+
+        // ---- "Splat the keyboard" gesture ----
+        void InitializeSplatTracking();
+        void OnContentKeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args);
+        void OnContentKeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args);
+        void OnSplatResetTick(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::Foundation::IInspectable const& args);
+
+        std::set<winrt::Windows::System::VirtualKey> m_heldKeys;
+        bool m_feedbackDialogOpen = false;
+        winrt::Microsoft::UI::Xaml::DispatcherTimer m_splatResetTimer{ nullptr };
+
+        static constexpr size_t kSplatThreshold = 5;
+
+        // ---- Recent activity ----
+        void SeedRecentActivity();
+        void AddRecentActivity(winrt::hstring const& kind, winrt::hstring const& title, winrt::hstring const& timeText, bool atTop);
+
+        // ---- Dashboard ----
+        void OpenDashboard(int crashId);
+
+        // ---- Window icon ----
+        void SetWindowIcon();
     };
 }
 

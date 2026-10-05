@@ -55,6 +55,7 @@ public:
 	afx_msg void OnCbnSelchangeProblemcombo();
 	afx_msg void OnBnClickedSendadditionalfiles();
 	afx_msg void OnBnClickedChkEnableHangDetect();
+	afx_msg void OnBnClickedUserFeedback();
 };
 
 //{{AFX_INSERT_LOCATION}}
