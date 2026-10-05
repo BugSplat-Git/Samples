@@ -20,7 +20,7 @@ This repository contains sample applications demonstrating how to integrate BugS
 - **MyCrasher** - An ATL/MFC Windows application sample
 - **MyWinUI3Crasher** - A WinUI 3 application sample (requires WER configuration to work properly)
 
-The samples build against the BugSplat for Windows SDK (8.6.0) in the `BugSplat` folder:
+The samples build against the BugSplat for Windows SDK (8.6.1) in the `BugSplat` folder:
 
 ```
 BugSplat/
