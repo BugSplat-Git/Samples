@@ -20,6 +20,19 @@ This repository contains sample applications demonstrating how to integrate BugS
 - **MyCrasher** - An ATL/MFC Windows application sample
 - **MyWinUI3Crasher** - A WinUI 3 application sample (requires WER configuration to work properly)
 
+The samples build against the BugSplat for Windows SDK (8.6.0) in the `BugSplat` folder:
+
+```
+BugSplat/
+  inc/                      BugSplat.h (C++ API), BugSplatC.h (C API)
+  <platform>/<config>/      platform: x64, ARM64, Win32; config: Release, Debug
+    bin/                    runtime files to ship next to your .exe: BugSplatMonitor.exe,
+                            BugSplatRc.dll, BugSplatWer.dll, BugSplat.dll, and their PDBs
+    lib/md/BugSplat.lib     static library, /MD (dynamic CRT)
+    lib/mt/BugSplat.lib     static library, /MT (static CRT)
+    lib/dll/BugSplat.lib    import library for bin/BugSplat.dll
+```
+
 Each sample follows similar integration patterns. Detailed instructions are provided below for `MyConsoleCrasher`, and the similar principles apply to the other samples. Note that `MyWinUI3Crasher` requires Windows Error Reporting (WER) to be configured via registry settings as described in the Integration section.
 
 
@@ -27,9 +40,9 @@ Each sample follows similar integration patterns. Detailed instructions are prov
 
 The following steps demonstrate how to get up and running with the `MyConsoleCrasher` sample application.
 
-1. Open `MyConsoleCrasher.sln` with Visual Studio 2022+
+1. Open `MyConsoleCrasher.sln` with Visual Studio 2022 or later, with the **Desktop development with C++** workload. The samples use the MSVC `v143` build tools, which Visual Studio 2022 includes; in Visual Studio 2026, add the **MSVC v143** component in the Visual Studio Installer
 2. Define values for `BUGSPLAT_DATABASE`, `APPLICATION_NAME`, and `APPLICATION_VERSION` in `Samples\MyConsoleCrasher\MyConsoleCrasher.h`
-3. Create a Client ID and Client Secret pair for your BugSplat database on the Integrations page
+3. Create a Client ID and Client Secret pair for your BugSplat database on the [Integrations](https://app.bugsplat.com/v2/database/integrations#oauth) page
 4. Create a file `Samples\MyConsoleCrasher\Scripts\env.ps1` and populate it with the following (being sure to substitute your `your-client-id` and `your-client-secret` values from the previous step):
 
 ```powershell
@@ -41,7 +54,7 @@ $BUGSPLAT_CLIENT_SECRET = "your-client-secret"
 
 <img width="1536" height="1059" alt="Visual Studio Project Properties" src="https://github.com/user-attachments/assets/11fee98f-22da-4e27-8ad4-2dece5b19d97" />
 
-6. Rebuild the project and run it outside of the Visual Studio debugger (Ctrl+F5). This is important since the debugger interferes with the BugSplat library's exception handling. You should see a dialog such as that shown below:
+6. Rebuild the project. A post-build step uploads its symbols with `symbol-upload-windows.exe`, which `Tools\Get-SymbolUpload.ps1` downloads on the first build; to build without uploading, pass `/p:PostBuildEventUseInBuild=false`. Run the sample outside of the Visual Studio debugger (Ctrl+F5). This is important since the debugger interferes with the BugSplat library's exception handling. You should see a dialog such as that shown below:
 
 <img width="800" height="772" alt="BugSplat Crash Dialog" src="https://github.com/user-attachments/assets/10895f33-00a8-4613-9e71-3547283e0e6e" />
 
@@ -62,12 +75,13 @@ This section explains how to modify your Microsoft Visual C++ application to upl
 
 Add BugSplat to your application using the following steps:
 
-1. **Link with `BugSplat.lib`** by adding an entry to `Linker > Input > Additional Dependencies`.
+1. **Link with `BugSplat.lib`** by adding an entry to `Linker > Input > Additional Dependencies`. Pick one flavor from `lib\`: `md` if your app builds with `/MD`, `mt` if it builds with `/MT`, or `dll` to load `BugSplat.dll`, whose C API (`BugSplatC.h`) works with either CRT.
 
-2. **Add redistributable files** to your application's installer:
+2. **Add redistributable files** from `bin\` to your application's installer:
    - `BugSplatMonitor.exe`
    - `BugSplatWer.dll`
    - `BugSplatRc.dll`
+   - `BugSplat.dll`, if you linked `lib\dll\BugSplat.lib`
 
 3. **Ensure your installer runs with Administrator privileges** and creates a `RuntimeExceptionHelperModules` registry key with a name containing the full path to `BugSplatWer.dll`. For more information about configuring WER see [this doc](https://learn.microsoft.com/en-us/windows/win32/wer/wer-settings).
 

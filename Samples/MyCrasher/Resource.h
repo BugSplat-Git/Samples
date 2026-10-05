@@ -20,14 +20,20 @@
 #define IDS_PROBLEM_STACK_OVERFLOW_DESC 1107
 #define IDS_PROBLEM_DIVBYZERO_DESC      1108
 #define IDS_PROBLEM_ITERATION_LOCK_DESC 1109
+#define IDC_USERFEEDBACK                1021
+#define IDD_USERFEEDBACK_DIALOG         132
+#define IDC_EDIT_FEEDBACK_TITLE         1022
+#define IDC_EDIT_FEEDBACK_DESCRIPTION   1023
+#define IDC_BROWSE_ATTACHMENT           1024
+#define IDC_STATIC_ATTACHMENT           1025
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

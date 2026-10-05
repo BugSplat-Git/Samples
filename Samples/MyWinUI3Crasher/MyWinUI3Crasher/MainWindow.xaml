@@ -7,73 +7,187 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="MyWinUI3Crasher - BugSplat Crash Examples">
+    Title="MyWinUI3Crasher">
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid Background="{StaticResource ScreenBgBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <!-- Full-width host provides the outer page padding; the inner column is capped
+                 and centered (a Grid parent centers a Stretch + MaxWidth child, which a
+                 ScrollViewer does not). -->
+            <Grid Padding="32,24,32,28">
+            <Grid MaxWidth="800" HorizontalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-        <TextBlock Text="BugSplat WinUI 3 Crash Examples" 
-                   FontSize="24" 
-                   FontWeight="Bold" 
-                   HorizontalAlignment="Center" 
-                   Margin="0,10,0,20"
-                   Grid.Row="0"/>
+                <!-- Top bar: logo + version chip + connected pill -->
+                <Grid Grid.Row="0" Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+                    <Image Source="ms-appx:///Images/bugsplat-logo.png"
+                           Stretch="Uniform"
+                           MaxHeight="26"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Grid.Column="0" />
 
-            <!-- Left Column -->
-            <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="Common Crashes" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <Button x:Name="MemoryExceptionButton" Content="Memory Exception" HorizontalAlignment="Stretch" Click="MemoryExceptionButton_Click"/>
-                <Button x:Name="DivideByZeroButton" Content="Divide By Zero" HorizontalAlignment="Stretch" Click="DivideByZeroButton_Click"/>
-                <Button x:Name="StackOverflowButton" Content="Stack Overflow" HorizontalAlignment="Stretch" Click="StackOverflowButton_Click"/>
-                <Button x:Name="ThrowButton" Content="Throw C++ Exception" HorizontalAlignment="Stretch" Click="ThrowButton_Click"/>
-                <Button x:Name="VectorOutOfBoundsButton" Content="Vector Out of Bounds" HorizontalAlignment="Stretch" Click="VectorOutOfBoundsButton_Click"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Border Background="{StaticResource BadgeBgBrush}" CornerRadius="10" Padding="10,3">
+                            <TextBlock x:Name="VersionChip" Text="v1.0.0" FontSize="12"
+                                       Foreground="{StaticResource TextTertiaryBrush}" />
+                        </Border>
+                        <Border Background="{StaticResource BadgeBgBrush}" CornerRadius="10" Padding="10,3">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="{StaticResource ConnectedBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="Connected" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
 
-                <TextBlock Text="Memory Corruption" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
-                <Button x:Name="UseAfterFreeButton" Content="Use After Free" HorizontalAlignment="Stretch" Click="UseAfterFreeButton_Click"/>
-                <Button x:Name="DoubleDeleteButton" Content="Double Delete" HorizontalAlignment="Stretch" Click="DoubleDeleteButton_Click"/>
-                <Button x:Name="HeapCorruptionButton" Content="Heap Corruption (ASAN builds only)" HorizontalAlignment="Stretch" Click="HeapCorruptionButton_Click"/>
-                <Button x:Name="StackOverrunButton" Content="Stack Overrun" HorizontalAlignment="Stretch" Click="StackOverrunButton_Click"/>
+                <!-- Title block -->
+                <StackPanel Grid.Row="1" Spacing="6" Margin="0,0,0,22">
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <TextBlock Text="BugSplat SDK &#183; Demo" FontSize="28" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" />
+                        <Border Background="{StaticResource BadgeBgBrush}" CornerRadius="6" Padding="8,2" VerticalAlignment="Center">
+                            <TextBlock Text="DEMO" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextTertiaryBrush}" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Trigger an event. We catch it, group it, route it to your dashboard."
+                               FontSize="15" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
 
-                <TextBlock Text="Advanced Features" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
-                <Button x:Name="SEHButton" Content="Custom SEH Exception" HorizontalAlignment="Stretch" Click="SEHButton_Click"/>
-                <Button x:Name="CreateXmlReportButton" Content="Create XML Report" HorizontalAlignment="Stretch" Click="CreateXmlReportButton_Click"/>
-            </StackPanel>
+                <!-- Section label -->
+                <TextBlock Grid.Row="2" Text="TRIGGER AN EVENT" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextTertiaryBrush}" Margin="2,0,0,10" />
 
-            <!-- Right Column -->
-            <StackPanel Grid.Column="2" Spacing="8">
-                <TextBlock Text="System-Level Crashes" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <Button x:Name="PrivilegedInstructionButton" Content="Privileged Instruction" HorizontalAlignment="Stretch" Click="PrivilegedInstructionButton_Click"/>
-                <Button x:Name="InvalidFunctionPointerButton" Content="Invalid Function Pointer" HorizontalAlignment="Stretch" Click="InvalidFunctionPointerButton_Click"/>
-                <Button x:Name="FastFailButton" Content="Fast Fail" HorizontalAlignment="Stretch" Click="FastFailButton_Click"/>
-                <Button x:Name="InvalidParametersButton" Content="Invalid Parameters" HorizontalAlignment="Stretch" Click="InvalidParametersButton_Click"/>
-                <Button x:Name="PureVirtualButton" Content="Pure Virtual Call" HorizontalAlignment="Stretch" Click="PureVirtualButton_Click"/>
-                <Button x:Name="ApplicationHangButton" Content="Application Hang" HorizontalAlignment="Stretch" Click="ApplicationHangButton_Click"/>
+                <!-- Event card grid -->
+                <Grid Grid.Row="3" Margin="0,0,0,22" ColumnSpacing="14" RowSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <TextBlock Text="Threading" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
-                <Button x:Name="ThreadButton" Content="Thread Exception" HorizontalAlignment="Stretch" Click="ThreadButton_Click"/>
+                    <Button x:Name="CrashCard" Grid.Row="0" Grid.Column="0"
+                            Style="{StaticResource EventCardButtonStyle}" Click="CrashCard_Click">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Source="ms-appx:///Images/splat_crash.png"
+                                   Width="40" Height="40" VerticalAlignment="Top" Stretch="Uniform" />
+                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="Crash" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" />
+                                <TextBlock Text="Native crash &#183; stack + threads + memory" FontSize="13"
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Button>
 
-                <TextBlock Text="Other Crashes" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,4"/>
-                <Button x:Name="AbortButton" Content="Call abort()" HorizontalAlignment="Stretch" Click="AbortButton_Click"/>
-                <Button x:Name="OutOfMemoryButton" Content="Exhaust Memory" HorizontalAlignment="Stretch" Click="OutOfMemoryButton_Click"/>
-                
-                <!-- BugSplat Logo at bottom of column -->
-                <Image x:Name="BugSplatLogo" 
-                       Source="ms-appx:///Images/bugsplat-logo.jpg" 
-                       Stretch="Uniform" 
-                       MaxHeight="100" 
-                       HorizontalAlignment="Center" 
-                       Margin="0,20,0,0"/>
-            </StackPanel>
-        </Grid>
+                    <Button x:Name="NonCrashErrorCard" Grid.Row="0" Grid.Column="1"
+                            Style="{StaticResource EventCardButtonStyle}" Click="NonCrashErrorCard_Click">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Source="ms-appx:///Images/splat_error.png"
+                                   Width="40" Height="40" VerticalAlignment="Top" Stretch="Uniform" />
+                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="Non-Crash Error" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" />
+                                <TextBlock Text="Exception caught &#183; app keeps running" FontSize="13"
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="UserFeedbackCard" Grid.Row="1" Grid.Column="0"
+                            Style="{StaticResource EventCardButtonStyle}" Click="UserFeedbackCard_Click">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Source="ms-appx:///Images/splat_feedback.png"
+                                   Width="40" Height="40" VerticalAlignment="Top" Stretch="Uniform" />
+                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="User Feedback" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" />
+                                <TextBlock Text="Open the feedback sheet" FontSize="13"
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="HangCard" Grid.Row="1" Grid.Column="1"
+                            Style="{StaticResource EventCardButtonStyle}" Click="HangCard_Click">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Source="ms-appx:///Images/splat_hang.png"
+                                   Width="40" Height="40" VerticalAlignment="Top" Stretch="Uniform" />
+                            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="Hang" FontSize="16" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" />
+                                <TextBlock Text="Freeze main thread for 8 seconds" FontSize="13"
+                                           Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                </Grid>
+
+                <!-- Recent activity card -->
+                <Border Grid.Row="4" Style="{StaticResource CardStyle}" Margin="0,0,0,20">
+                    <StackPanel Spacing="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="RECENT ACTIVITY" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextTertiaryBrush}" VerticalAlignment="Center" />
+                            <HyperlinkButton Grid.Column="1" x:Name="ViewDashboardLink" Content="View dashboard &#8599;"
+                                             Padding="4,0" Click="ViewDashboard_Click" />
+                        </Grid>
+
+                        <StackPanel x:Name="RecentActivityPanel" Spacing="0" />
+
+                        <TextBlock x:Name="RecentActivityEmpty" Text="No activity yet."
+                                   FontSize="13" Foreground="{StaticResource TextTertiaryBrush}"
+                                   Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Splat footer hint -->
+                <TextBlock Grid.Row="5" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
+                           Margin="0,0,0,4">
+                    <Run Text="Press " Foreground="#6B7280" FontSize="13" />
+                    <Run Text="any 5 keys at once" FontWeight="SemiBold" Foreground="#4B5563" FontSize="13" />
+                    <Run Text=" to send feedback &#8212; " Foreground="#6B7280" FontSize="13" />
+                    <Run Text="splat your keyboard." FontFamily="Segoe Script" FontStyle="Italic"
+                         Foreground="#1F73E8" FontSize="14" />
+                </TextBlock>
+            </Grid>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </Window>
