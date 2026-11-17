@@ -48,9 +48,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>BugSplatMonitor.exe</Link>
     </Content>
-    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\bin\BugSplatRc.dll">
+    <Content Include="..\..\..\BugSplat\x64\$(Configuration)\bin\BugSplatReporter.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>BugSplatRc.dll</Link>
+      <Link>BugSplatReporter.exe</Link>
     </Content>
     <Content Include="..\..\..\BugSplat\x64\$(Configuration)\bin\BugSplatWer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -98,13 +98,13 @@
     </PropertyGroup>
     <ItemGroup>
       <BugSplatFiles Include="$(BugSplatSourceDir)BugSplatMonitor.exe" />
-      <BugSplatFiles Include="$(BugSplatSourceDir)BugSplatRc.dll" />
+      <BugSplatFiles Include="$(BugSplatSourceDir)BugSplatReporter.exe" />
       <BugSplatFiles Include="$(BugSplatSourceDir)BugSplatWer.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(BugSplatFiles)" DestinationFolder="$(AppXLayoutDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" UseHardlinksIfPossible="false" Retries="3" RetryDelayMilliseconds="500" />
     <Message Text="Copied BugSplat files from $(BugSplatSourceDir) to $(AppXLayoutDir)" Importance="high" />
     <Message Text="  - BugSplatMonitor.exe: $([System.IO.File]::GetLastWriteTime('$(BugSplatSourceDir)BugSplatMonitor.exe'))" Importance="high" />
-    <Message Text="  - BugSplatRc.dll: $([System.IO.File]::GetLastWriteTime('$(BugSplatSourceDir)BugSplatRc.dll'))" Importance="high" />
+    <Message Text="  - BugSplatReporter.exe: $([System.IO.File]::GetLastWriteTime('$(BugSplatSourceDir)BugSplatReporter.exe'))" Importance="high" />
     <Message Text="  - BugSplatWer.dll: $([System.IO.File]::GetLastWriteTime('$(BugSplatSourceDir)BugSplatWer.dll'))" Importance="high" />
   </Target>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
