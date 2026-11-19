@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Loaded by MyDotNetFrameworkHostCrasher through the CLR hosting interfaces.
+
+     A classic (non-SDK-style) project on purpose: it needs no NuGet restore, so building the
+     solution in Visual Studio or with plain msbuild always builds it. An SDK-style project fails
+     with NETSDK1004 whenever nothing has restored it first. -->
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5E8A2F61-3C47-4D9B-B1E6-7A0C9D4F2B83}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MyDotNetFrameworkHostCrasherManaged</RootNamespace>
+    <AssemblyName>MyDotNetFrameworkHostCrasherManaged</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Windows PDB, the format BugSplat's symbol upload fingerprints. -->
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <!-- MyDotNetFrameworkHostCrasher.vcxproj copies the assembly and PDB from here. -->
+    <OutputPath>bin\$(Configuration)\net472\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CrashExpectation.cs" />
+    <Compile Include="Crashers.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

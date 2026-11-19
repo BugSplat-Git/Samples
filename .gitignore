@@ -20,6 +20,8 @@ Samples/**/BundleArtifacts/
 BugSplat/*/*/MyWinUI3Crasher/
 BugSplat/*/*/bin/MyConsoleCrasher.*
 BugSplat/*/*/bin/MyCrasher.*
+BugSplat/*/*/bin/MyDotNet*
+BugSplat/*/*/bin/BugSplatDotNet.*
 
 # Downloaded by Tools\Get-SymbolUpload.ps1 on the first build
 Tools/symbol-upload-windows.exe

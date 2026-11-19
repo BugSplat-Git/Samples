@@ -14,11 +14,21 @@
 
 ## Introduction 👋
 
-This repository contains sample applications demonstrating how to integrate BugSplat crash reporting into Windows C++ applications. The samples include:
+This repository contains sample applications demonstrating how to integrate BugSplat crash reporting into Windows C++ and .NET applications.
+
+C++ samples, using `BugSplat.h`:
 
 - **MyConsoleCrasher** - A console application demonstrating BugSplat integration with various crash types
 - **MyCrasher** - An ATL/MFC Windows application sample
 - **MyWinUI3Crasher** - A WinUI 3 application sample (requires WER configuration to work properly)
+
+.NET samples, using `BugSplatDotNet.dll` (see [.NET Samples](#net-samples-)):
+
+- **MyDotNetCrasher** - A .NET 10 console application with crash, error, and user feedback modes
+- **MyDotNetWinUI3Crasher** - A .NET 10 WinUI 3 application sample
+- **MyDotNetFrameworkWpfCrasher** - A .NET Framework 4.7.2 WPF application sample
+- **MyDotNetFrameworkHostCrasher** - A native C++ application that hosts the .NET Framework runtime and crashes in C# code
+- **MyDotNetCrasherNative** - The native DLL the .NET samples call to produce mixed-mode C#/C++ crashes
 
 The samples build against the BugSplat for Windows SDK (9.3.0) in the `BugSplat` folder:
 
@@ -32,6 +42,7 @@ BugSplat/
     lib/md/BugSplat.lib     static library, /MD (dynamic CRT)
     lib/mt/BugSplat.lib     static library, /MT (static CRT)
     lib/dll/BugSplat.lib    import library for bin/BugSplat.dll
+  dotnet/<config>/<tfm>/    BugSplatDotNet.dll for net10.0 and net472, with its PDB and XML docs
 ```
 
 Each sample follows similar integration patterns. Detailed instructions are provided below for `MyConsoleCrasher`, and the similar principles apply to the other samples. Note that `MyWinUI3Crasher` requires Windows Error Reporting (WER) to be configured via registry settings as described in the Integration section.
@@ -64,6 +75,21 @@ $BUGSPLAT_CLIENT_SECRET = "your-client-secret"
 8. Navigate to the BugSplat [Dashboard](https://app.bugsplat.com/v2/dashboard) and click the link in the ID column to view details about your crash, including the full symbolicated stack trace and various crash metadata.
 
 Finally, experiment with other features of the library by examining the `MyConsoleCrasher` source code and supplying different command-line arguments.
+
+## .NET Samples 🟣
+
+The .NET samples reference `BugSplatDotNet.dll` from `BugSplat\dotnet\` and copy the native runtime (`BugSplat.dll`, `BugSplatMonitor.exe`, `BugSplatReporter.exe` and `BugSplatWer.dll`) from `BugSplat\x64\` next to the app. Each sample has its own solution and README with setup and run instructions:
+
+| Sample | Solution | Runtime |
+| --- | --- | --- |
+| [MyDotNetCrasher](Samples/MyDotNetCrasher) | `MyDotNetCrasher.sln` | .NET 10 console |
+| [MyDotNetWinUI3Crasher](Samples/MyDotNetWinUI3Crasher) | `MyDotNetWinUI3Crasher.sln` | .NET 10 WinUI 3 |
+| [MyDotNetFrameworkWpfCrasher](Samples/MyDotNetFrameworkWpfCrasher) | `MyDotNetFrameworkWpfCrasher.sln` | .NET Framework 4.7.2 WPF |
+| [MyDotNetFrameworkHostCrasher](Samples/MyDotNetFrameworkHostCrasher) | `MyDotNetFrameworkHostCrasher.sln` | Native C++ hosting .NET Framework 4.7.2 |
+
+As with the C++ samples, set your database in the sample's source, add your Client ID and Client Secret to the sample's `Scripts\env.ps1` so that the build uploads symbols, and run outside the debugger.
+
+The mixed-mode modes in `MyDotNetCrasher`, `MyDotNetWinUI3Crasher` and `MyDotNetFrameworkWpfCrasher` call into [MyDotNetCrasherNative](Samples/MyDotNetCrasherNative), which is built by the same solutions.
 
 ## Integration 🏗️
 
@@ -169,6 +195,15 @@ Instructions for modifying the default crash dialog can be found on the [Windows
 - [BugSplat for Windows API Documentation](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus/bugsplat-for-windows-api-documentation)
 - [BugSplat for Windows Upgrade Guide](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus/bugsplat-for-windows-upgrade-guide)
 - [BugSplat for Windows Dependencies](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus/bugsplat-for-windows-dependencies)
+
+## Updating the Samples 🔄
+
+This repository is the contents of the `BugSplat.zip` and `BugSplatDotNet.zip` assets from a [bugsplat-windows release](https://github.com/BugSplat-Git/bugsplat-windows/releases). To update it to a new release:
+
+1. Download both zips from the release
+2. Extract `BugSplatDotNet.zip` over the repository, then `BugSplat.zip`. Both zips contain the x64 runtime, signed separately, so extracting `BugSplat.zip` last keeps those binaries the same as the C++ SDK's
+3. Delete `Samples/MyWinUI3Crasher/MyWinUI3Crasher/Scripts/Prepare.ps1` if the zip includes it. It is a release build script, and [bugsplat-windows#264](https://github.com/BugSplat-Git/bugsplat-windows/pull/264) removes it from the zip
+4. Update the version in this README, then commit everything except `Tools/symbol-upload-windows.exe`, which `.gitignore` excludes
 
 ## License 🪪
 
