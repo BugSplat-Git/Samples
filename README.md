@@ -67,7 +67,7 @@ Finally, experiment with other features of the library by examining the `MyConso
 
 ## Integration 🏗️
 
-This section explains how to modify your Microsoft Visual C++ application to upload crashes with full debug information to the BugSplat web application. Before getting started, please download the BugSplat SDK for Windows by clicking [here](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus).
+This section explains how to modify your Microsoft Visual C++ application to upload crashes with full debug information to the BugSplat web application. Before getting started, please download the BugSplat SDK for Windows by clicking [here](https://docs.bugsplat.com/integrations/desktop/windows).
 
 ### Getting Started
 
@@ -89,7 +89,7 @@ Add BugSplat to your application using the following steps:
 
 4. **Include `BugSplat.h`** in your application's source.
 
-5. **Create an instance of `BugSplat`** following the example in MyConsoleCrasher. The BugSplat constructor requires three parameters: `database`, `application`, and `version`. A new BugSplat database can be created on the Database page. Choose values for application name and version to match your product release. These same values are typically used when uploading symbol files for your application. To learn more about symbol uploads, please see our [docs](https://docs.bugsplat.com/education/faq/how-to-upload-symbol-files-with-symbol-upload).
+5. **Create an instance of `BugSplat`** following the example in MyConsoleCrasher. The BugSplat constructor requires three parameters: `database`, `application`, and `version`. A new BugSplat database can be created on the Database page. Choose values for application name and version to match your product release. These same values are typically used when uploading symbol files for your application. To learn more about symbol uploads, please see our [docs](https://docs.bugsplat.com/guides/working-with-symbol-files/upload-symbols-with-symbol-upload).
 
 ```cpp
 #include "BugSplat.h"
@@ -161,14 +161,14 @@ If everything is configured correctly, you should see a crash report that resemb
 
 ### Crash Dialog
 
-Instructions for modifying the default crash dialog can be found on the [Windows Dialog Box page](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus).
+Instructions for modifying the default crash dialog can be found on the [Windows Dialog Box page](https://docs.bugsplat.com/integrations/desktop/windows).
 
 ## Additional Resources 📚
 
-- [Address Sanitizer Reports](https://docs.bugsplat.com/introduction/getting-started/posting-a-test-crash/myconsolecrasher-c-plus-plus/address-sanitizer-reports)
-- [BugSplat for Windows API Documentation](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus/bugsplat-for-windows-api-documentation)
-- [BugSplat for Windows Upgrade Guide](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus/bugsplat-for-windows-upgrade-guide)
-- [BugSplat for Windows Dependencies](https://docs.bugsplat.com/introduction/getting-started/integrations/desktop/cplusplus/bugsplat-for-windows-dependencies)
+- [Address Sanitizer Reports](https://docs.bugsplat.com/getting-started/posting-a-test-crash/myconsolecrasher-c-plus-plus/address-sanitizer-reports)
+- [BugSplat for Windows API Documentation](https://docs.bugsplat.com/integrations/desktop/windows/bugsplat-for-windows-api-documentation)
+- [BugSplat for Windows Upgrade Guide](https://docs.bugsplat.com/integrations/desktop/windows/bugsplat-for-windows-upgrade-guide)
+- [BugSplat for Windows Dependencies](https://docs.bugsplat.com/integrations/desktop/windows/dependencies)
 
 ## License 🪪
 
