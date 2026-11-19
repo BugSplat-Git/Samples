@@ -16,6 +16,7 @@
 // The C API manages a single process-wide BugSplat instance, created by
 // BugSplat_Init. All strings are null-terminated UTF-16 (wchar_t).
 
+#include "BugSplatVersion.h"
 #include <wchar.h>
 
 #ifdef __cplusplus
@@ -58,8 +59,10 @@ BUGSPLAT_API int BUGSPLAT_CALL BugSplat_AttachToProcess(unsigned long pid);
 // string; it changes after each upload.
 BUGSPLAT_API const wchar_t* BUGSPLAT_CALL BugSplat_GetCrashFolder(void);
 
-// Uploads the report in the crash folder and removes the folder on success. Returns 0
-// before BugSplat_Init or if no BugSplat monitor is available.
+// Uploads the report in the crash folder and removes the folder on success. Shows the crash
+// dialog unless quiet mode is on; then returns once the user has answered it, and the monitor
+// finishes the upload in the background. In quiet mode, returns once the upload is done.
+// Returns 0 before BugSplat_Init or if no BugSplat monitor is available.
 BUGSPLAT_API int BUGSPLAT_CALL BugSplat_PostCrash(void);
 
 // Sets crash 'key' field
@@ -89,8 +92,17 @@ BUGSPLAT_API int BUGSPLAT_CALL BugSplat_RemoveAttachment(const wchar_t* filepath
 // the user (desktop-only)
 BUGSPLAT_API void BUGSPLAT_CALL BugSplat_SetQuietMode(int quiet);
 
+// The domains the crash dialog may link to, separated by semicolons, e.g.
+// L"example.com;support.example.com". Links in the dialog's text only work for these
+// domains and their subdomains, and only over https. NULL or "" allows none, the default.
+// See BugSplat::SetCrashDialogLinkDomains in BugSplat.h.
+BUGSPLAT_API void BUGSPLAT_CALL BugSplat_SetCrashDialogLinkDomains(const wchar_t* domains);
+
 // Set the timeout in ms used to determine if a process is hung.
-// Default is 5000.  Disable hang detection with 0.
+// Default is 5000.  Disable hang detection with 0. The monitor checks every
+// 5 seconds and waits up to this timeout for a response, so with the default a
+// frozen window is detected in 5 to 10 seconds. Unless quiet mode is on, it then
+// asks the user before writing the report.
 BUGSPLAT_API void BUGSPLAT_CALL BugSplat_SetHangDetectionTimeout(int ms);
 
 // Tell BugSplat the app is suspending (non-zero) or has resumed (0). While
@@ -181,6 +193,17 @@ BUGSPLAT_API void BUGSPLAT_CALL BugSplat_SetMiniDumpType(int dumpType);
 // use the SDK default. Most callers do not need this: the filter installed by
 // BugSplat_Init already captures unhandled crashes automatically.
 BUGSPLAT_API void BUGSPLAT_CALL BugSplat_GenerateDump(void* exceptionPointers, int dumpType);
+
+// Handles a fatal exception exactly as the unhandled exception filter installed by
+// BugSplat_Init would: creates the report, uploads it (or shows the crash dialog),
+// then applies the crash completion behavior, so it normally does not return. For
+// hosts that catch fatal errors themselves instead of letting them reach the OS
+// filter, such as a runtime's fatal-error callback. Its signature fits a callback
+// that takes an EXCEPTION_POINTERS*. Returns EXCEPTION_CONTINUE_SEARCH (0) when
+// BugSplat is not initialized or exceptionPointers is null, and when the completion
+// behavior is BUGSPLAT_CRASH_CONTINUE_SEARCH.
+struct _EXCEPTION_POINTERS;
+BUGSPLAT_API long BUGSPLAT_CALL BugSplat_HandleException(struct _EXCEPTION_POINTERS* exceptionPointers);
 
 #ifdef __cplusplus
 }

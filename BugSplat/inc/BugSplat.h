@@ -1,4 +1,5 @@
 #pragma once
+#include "BugSplatVersion.h"
 #include <new.h>
 #include <string>
 #include <signal.h>
@@ -52,6 +53,14 @@ public:
     // When true, the crash report dialog will not be presented to the user (desktop-only)
     void SetQuietMode(bool flag);
 
+    // The domains the crash dialog may link to, separated by semicolons, for example
+    // L"example.com;support.example.com" (desktop-only). Links in the dialog's text come from
+    // its theme's string files, but they only work for these domains and their subdomains,
+    // and only as https:// links; anything else is shown as plain text. By default no domain
+    // is allowed, so a theme file on its own can never put a working link in the dialog.
+    // Pass nullptr or an empty string to allow none again. At most 1023 characters.
+    void SetCrashDialogLinkDomains(const wchar_t* domains);
+
     // Sets crash 'key' field
     void SetKey(const wchar_t* user);
 
@@ -72,6 +81,9 @@ public:
     void SetMiniDumpType(MINIDUMP_TYPE dumpType);
 
 	//! Set the timeout in ms used to determine if a process is hung. Default is 5000.  Disable hang detection with 0.
+	//! The monitor checks every 5 seconds and waits up to this timeout for a response, so with the
+	//! default a frozen window is detected in 5 to 10 seconds. Unless quiet mode is on, it then asks
+	//! the user before writing the report.
     void SetHangDetectionTimeout(int ms);
 
     //! Determines what the crash handler does after creating and uploading the report:
@@ -88,7 +100,12 @@ public:
     // Note, the Xbox team requires that MiniDumpFilterTriage be used for production
     void GenerateDump(LPEXCEPTION_POINTERS const exceptionPointers, 
                       MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(MiniDumpNormal|MiniDumpFilterTriage)) const;
-    
+
+    // Handles a fatal exception exactly as BugSplat's unhandled exception filter would:
+    // report, upload, then the crash completion behavior. For hosts that catch fatal
+    // errors themselves instead of letting them reach the OS filter.
+    LONG HandleException(LPEXCEPTION_POINTERS const exceptionPointers) const;
+
     // Add/remove file attachments. Attachments are included in both crash reports and feedback uploads.
     bool AddAttachment(const wchar_t* filepath);
     bool RemoveAttachment(const wchar_t* filepath);
@@ -118,7 +135,9 @@ public:
     // hang detection and crash reports are not generated. FALSE on resume.
     void SetSuspendingState(BOOL status);
       
-    // Posts a single crash report and removes its folder on success.
+    // Posts a single crash report and removes its folder on success. Shows the crash dialog
+    // unless quiet mode is on; then returns once the user has answered it, and the monitor
+    // finishes the upload in the background. In quiet mode, returns once the upload is done.
     // Returns false if no BugSplat monitor is available.
     bool PostCrash();
 

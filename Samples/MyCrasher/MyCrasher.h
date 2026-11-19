@@ -4,7 +4,7 @@
 // Define your BugSplat database, application name, and application version by updating the lines below
 #define BUGSPLAT_DATABASE L"Fred"
 #define APPLICATION_NAME L"MyCrasher"
-#define APPLICATION_VERSION L"7.0.0"
+#define APPLICATION_VERSION L"9.0.0"
 
 #ifndef BUGSPLAT_DATABASE
 #error "Please define a BugSplat database"

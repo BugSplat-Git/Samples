@@ -20,14 +20,15 @@ This repository contains sample applications demonstrating how to integrate BugS
 - **MyCrasher** - An ATL/MFC Windows application sample
 - **MyWinUI3Crasher** - A WinUI 3 application sample (requires WER configuration to work properly)
 
-The samples build against the BugSplat for Windows SDK (8.6.1) in the `BugSplat` folder:
+The samples build against the BugSplat for Windows SDK (9.3.0) in the `BugSplat` folder:
 
 ```
 BugSplat/
-  inc/                      BugSplat.h (C++ API), BugSplatC.h (C API)
+  inc/                      BugSplat.h (C++ API), BugSplatC.h (C API), BugSplatVersion.h
   <platform>/<config>/      platform: x64, ARM64, Win32; config: Release, Debug
     bin/                    runtime files to ship next to your .exe: BugSplatMonitor.exe,
-                            BugSplatRc.dll, BugSplatWer.dll, BugSplat.dll, and their PDBs
+                            BugSplatReporter.exe, BugSplatWer.dll, BugSplat.dll, their PDBs,
+                            and the optional BugSplatTheme/ folder for the crash dialog
     lib/md/BugSplat.lib     static library, /MD (dynamic CRT)
     lib/mt/BugSplat.lib     static library, /MT (static CRT)
     lib/dll/BugSplat.lib    import library for bin/BugSplat.dll
@@ -56,9 +57,9 @@ $BUGSPLAT_CLIENT_SECRET = "your-client-secret"
 
 6. Rebuild the project. A post-build step uploads its symbols with `symbol-upload-windows.exe`, which `Tools\Get-SymbolUpload.ps1` downloads on the first build; to build without uploading, pass `/p:PostBuildEventUseInBuild=false`. Run the sample outside of the Visual Studio debugger (Ctrl+F5). This is important since the debugger interferes with the BugSplat library's exception handling. You should see a dialog such as that shown below:
 
-<img width="800" height="772" alt="BugSplat Crash Dialog" src="https://github.com/user-attachments/assets/10895f33-00a8-4613-9e71-3547283e0e6e" />
+<img alt="BugSplat Crash Dialog" src="https://raw.githubusercontent.com/BugSplat-Git/bugsplat-docs/master/.gitbook/assets/windows-crash-dialog-light.png" />
 
-7. Enter some descriptive text to help you identify the crash you are about to upload. Click the `Send Error Report` button, and voilà! The report will be sent! In the BugSplat web app, look for the crash report with the description you entered.
+7. Enter some descriptive text to help you identify the crash you are about to upload. Click the `Send report` button, and voilà! The report will be sent! In the BugSplat web app, look for the crash report with the description you entered.
 
 8. Navigate to the BugSplat [Dashboard](https://app.bugsplat.com/v2/dashboard) and click the link in the ID column to view details about your crash, including the full symbolicated stack trace and various crash metadata.
 
@@ -79,9 +80,10 @@ Add BugSplat to your application using the following steps:
 
 2. **Add redistributable files** from `bin\` to your application's installer:
    - `BugSplatMonitor.exe`
+   - `BugSplatReporter.exe`, which shows the crash dialog
    - `BugSplatWer.dll`
-   - `BugSplatRc.dll`
    - `BugSplat.dll`, if you linked `lib\dll\BugSplat.lib`
+   - the `BugSplatTheme` folder, if you [customize the crash dialog](https://docs.bugsplat.com/education/how-tos/customize-the-crash-dialog)
 
 3. **Ensure your installer runs with Administrator privileges** and creates a `RuntimeExceptionHelperModules` registry key with a name containing the full path to `BugSplatWer.dll`. For more information about configuring WER see [this doc](https://learn.microsoft.com/en-us/windows/win32/wer/wer-settings).
 
