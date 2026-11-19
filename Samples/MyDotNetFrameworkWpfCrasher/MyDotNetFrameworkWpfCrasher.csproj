@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>MyDotNetFrameworkWpfCrasher</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>Assets\bugsplat.ico</ApplicationIcon>
+    <!-- Windows PDB, the format BugSplat's symbol upload fingerprints. -->
+    <DebugType>full</DebugType>
+
+    <!-- BugSplat's native runtime is x64 only. A .NET Framework exe defaults to AnyCPU with
+         Prefer32Bit, which runs as a 32-bit process and can't load it, so pin x64. -->
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+
+    <!-- Root of the BugSplat SDK layout (x64\<cfg>\bin holds BugSplat.dll + the monitor).
+         Override to test a different SDK: /p:BugSplatDir=C:\path\to\BugSplat\ -->
+    <BugSplatDir Condition="'$(BugSplatDir)' == ''">..\..\BugSplat\</BugSplatDir>
+    <!-- Paths below concatenate directly, so an override must end in a separator. -->
+    <BugSplatDir Condition="!HasTrailingSlash('$(BugSplatDir)')">$(BugSplatDir)\</BugSplatDir>
+    <!-- Build into the SDK layout's bin folder, where the other samples' executables land. -->
+    <OutputPath>$(BugSplatDir)x64\$(Configuration)\bin\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- The native runtime (BugSplat.dll + the monitor): this configuration's build when it
+         exists, as in a repo build, otherwise the Release runtime the .NET SDK download ships.
+         The C API is ABI-stable, so a Debug app runs fine with the Release BugSplat.dll. -->
+    <BugSplatBin Condition="'$(BugSplatBin)' == '' and Exists('$(BugSplatDir)x64\$(Configuration)\bin\BugSplatMonitor.exe')">$(BugSplatDir)x64\$(Configuration)\bin\</BugSplatBin>
+    <BugSplatBin Condition="'$(BugSplatBin)' == ''">$(BugSplatDir)x64\Release\bin\</BugSplatBin>
+    <!-- BugSplatDotNet, built into the SDK layout for the same configuration. -->
+    <BugSplatDotNetConfig>Release</BugSplatDotNetConfig>
+    <BugSplatDotNetConfig Condition="'$(Configuration)' == 'Debug'">Debug</BugSplatDotNetConfig>
+    <BugSplatDotNetBin>$(BugSplatDir)dotnet\$(BugSplatDotNetConfig)\net472\</BugSplatDotNetBin>
+    <!-- Native crash DLL for the Mixed-Mode card, built by ..\MyDotNetCrasherNative (x64,
+         MSBuild) for the same configuration. MyDotNetFrameworkWpfCrasher.sln builds it first. -->
+    <NativeCrasherBin>..\MyDotNetCrasherNative\bin\x64\$(Configuration)\</NativeCrasherBin>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BugSplatDotNet from the SDK's dotnet folder, next to the native binaries. -->
+    <Reference Include="BugSplatDotNet" HintPath="$(BugSplatDotNetBin)BugSplatDotNet.dll" />
+  </ItemGroup>
+
+  <!-- BugSplat's native runtime files must sit next to the app executable: the SDK spawns
+       "<app-dir>\BugSplatMonitor.exe" on a crash. Don't copy them when they already live in the
+       output folder: Content items become this project's outputs, which Clean deletes. -->
+  <ItemGroup Condition="'$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory), $(BugSplatBin)))' != '$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory), $(OutputPath)))'">
+    <Content Include="$(BugSplatBin)BugSplat.dll" Link="BugSplat.dll" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(BugSplatBin)BugSplatMonitor.exe" Link="BugSplatMonitor.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(BugSplatBin)BugSplatReporter.exe" Link="BugSplatReporter.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(BugSplatBin)BugSplatWer.dll" Link="BugSplatWer.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(NativeCrasherBin)MyDotNetCrasherNative.dll" Link="MyDotNetCrasherNative.dll" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(NativeCrasherBin)MyDotNetCrasherNative.pdb" Link="MyDotNetCrasherNative.pdb" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\*.png" />
+    <None Include="Scripts\SymbolUpload.ps1" />
+  </ItemGroup>
+
+  <!-- Sends the exe, DLLs and their .pdb files to BugSplat so crash stacks show file and line
+       numbers. Needs Scripts\env.ps1 (or BUGSPLAT_CLIENT_ID / BUGSPLAT_CLIENT_SECRET); see the
+       README. To skip it, build with /p:BugSplatSymbolUpload=false. -->
+  <Target Name="BugSplatSymbolUpload" AfterTargets="Build" Condition="'$(BugSplatSymbolUpload)' != 'false'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)Scripts\SymbolUpload.ps1&quot; -projectDir &quot;$(ProjectDir)\&quot; -outDir &quot;$(TargetDir)\&quot;" />
+  </Target>
+
+</Project>

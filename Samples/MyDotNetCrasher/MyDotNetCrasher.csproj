@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Root of the BugSplat SDK layout (bin/ holds BugSplat.dll + the monitor).
+         Override to test a different SDK: /p:BugSplatDir=C:\path\to\BugSplat\ -->
+    <BugSplatDir Condition="'$(BugSplatDir)' == ''">..\..\BugSplat\</BugSplatDir>
+    <!-- Paths below concatenate directly, so an override must end in a separator. -->
+    <BugSplatDir Condition="!HasTrailingSlash('$(BugSplatDir)')">$(BugSplatDir)\</BugSplatDir>
+    <BugSplatConfig>Release</BugSplatConfig>
+    <BugSplatConfig Condition="'$(Configuration)' == 'Debug'">Debug</BugSplatConfig>
+    <!-- The native runtime (BugSplat.dll + the monitor): this configuration's build when it
+         exists, as in a repo build, otherwise the Release runtime the .NET SDK download ships.
+         The C API is ABI-stable, so a Debug app runs fine with the Release BugSplat.dll. -->
+    <BugSplatBin Condition="'$(BugSplatBin)' == '' and Exists('$(BugSplatDir)x64\$(BugSplatConfig)\bin\BugSplatMonitor.exe')">$(BugSplatDir)x64\$(BugSplatConfig)\bin\</BugSplatBin>
+    <BugSplatBin Condition="'$(BugSplatBin)' == ''">$(BugSplatDir)x64\Release\bin\</BugSplatBin>
+    <BugSplatDotNetBin>$(BugSplatDir)dotnet\$(BugSplatConfig)\net10.0\</BugSplatDotNetBin>
+    <!-- The native crash DLL the mixed-mode (C#/C++) modes P/Invoke. Built by
+         MyDotNetCrasherNative.vcxproj (x64) into its own bin; consumed here as a prebuilt
+         file since a .NET SDK project cannot build a vcxproj under `dotnet build`. -->
+    <NativeCrasherBin>..\MyDotNetCrasherNative\bin\x64\$(Configuration)\</NativeCrasherBin>
+  </PropertyGroup>
+
+  <!-- BugSplatDotNet from the SDK's dotnet folder, next to the native binaries. -->
+  <ItemGroup>
+    <Reference Include="BugSplatDotNet" HintPath="$(BugSplatDotNetBin)BugSplatDotNet.dll" />
+  </ItemGroup>
+
+  <!-- BugSplat's native runtime files must sit next to the app exe: the SDK spawns
+       "<app-dir>\BugSplatMonitor.exe" on a crash. -->
+  <ItemGroup>
+    <BugSplatNative Include="$(BugSplatBin)BugSplat.dll" />
+    <BugSplatNative Include="$(BugSplatBin)BugSplatMonitor.exe" />
+    <BugSplatNative Include="$(BugSplatBin)BugSplatReporter.exe" />
+    <BugSplatNative Include="$(BugSplatBin)BugSplatWer.dll" />
+    <!-- Native crash surface for the mixed-mode modes (+ its PDB, so BugSplat/bugsplat-cdb
+         can symbolicate the native half of the stack). -->
+    <BugSplatNative Include="$(NativeCrasherBin)MyDotNetCrasherNative.dll" />
+    <BugSplatNative Include="$(NativeCrasherBin)MyDotNetCrasherNative.pdb" />
+  </ItemGroup>
+
+  <Target Name="CopyBugSplatNative" AfterTargets="Build">
+    <Copy SourceFiles="@(BugSplatNative)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+  </Target>
+  <ItemGroup>
+    <None Include="Scripts\SymbolUpload.ps1" />
+  </ItemGroup>
+
+  <!-- Sends the exe, DLLs and their .pdb files (including MyDotNetCrasherNative's) to BugSplat so
+       crash stacks show file and line numbers. Needs Scripts\env.ps1 (or BUGSPLAT_CLIENT_ID /
+       BUGSPLAT_CLIENT_SECRET); see the README. To skip it, build with /p:BugSplatSymbolUpload=false. -->
+  <Target Name="BugSplatSymbolUpload" AfterTargets="CopyBugSplatNative" Condition="'$(BugSplatSymbolUpload)' != 'false'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)Scripts\SymbolUpload.ps1&quot; -projectDir &quot;$(ProjectDir)\&quot; -outDir &quot;$(TargetDir)\&quot;" />
+  </Target>
+
+  <!-- `dotnet publish` writes to $(PublishDir), not $(OutDir); the runtime files must land there too. -->
+  <Target Name="CopyBugSplatNativeToPublishDir" AfterTargets="Publish">
+    <Copy SourceFiles="@(BugSplatNative)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+  </Target>
+
+</Project>
