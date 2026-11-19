@@ -20,11 +20,11 @@ This repository contains sample applications demonstrating how to integrate BugS
 - **MyCrasher** - An ATL/MFC Windows application sample
 - **MyWinUI3Crasher** - A WinUI 3 application sample (requires WER configuration to work properly)
 
-The samples build against the BugSplat for Windows SDK (9.2.0) in the `BugSplat` folder:
+The samples build against the BugSplat for Windows SDK (9.3.0) in the `BugSplat` folder:
 
 ```
 BugSplat/
-  inc/                      BugSplat.h (C++ API), BugSplatC.h (C API)
+  inc/                      BugSplat.h (C++ API), BugSplatC.h (C API), BugSplatVersion.h
   <platform>/<config>/      platform: x64, ARM64, Win32; config: Release, Debug
     bin/                    runtime files to ship next to your .exe: BugSplatMonitor.exe,
                             BugSplatReporter.exe, BugSplatWer.dll, BugSplat.dll, their PDBs,

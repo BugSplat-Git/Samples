@@ -16,6 +16,7 @@
 // The C API manages a single process-wide BugSplat instance, created by
 // BugSplat_Init. All strings are null-terminated UTF-16 (wchar_t).
 
+#include "BugSplatVersion.h"
 #include <wchar.h>
 
 #ifdef __cplusplus

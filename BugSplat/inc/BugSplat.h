@@ -1,4 +1,5 @@
 #pragma once
+#include "BugSplatVersion.h"
 #include <new.h>
 #include <string>
 #include <signal.h>
