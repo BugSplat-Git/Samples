@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BugSplatDotNet</name>
+    </assembly>
+    <members>
+        <member name="T:BugSplatDotNet.BugSplat">
+             <summary>
+             Crash reporting for .NET and .NET Framework (4.7.2+) on Windows, built on the native BugSplat
+             SDK (BugSplat.dll). Every report is a minidump that BugSplat symbolicates server-side from
+             uploaded symbols, so managed frames get file names and line numbers without shipping PDBs.
+            
+               * Crashes — <see cref="M:BugSplatDotNet.BugSplat.#ctor(System.String,System.String,System.String)"/> installs the native
+                 unhandled-exception filter and WER handler. Unhandled managed exceptions and hard faults
+                 (access violations, fail-fast, stack overflow, corrupted heap, crashes inside P/Invoke)
+                 are captured as a minidump by BugSplatMonitor.exe.
+               * Handled exceptions — <see cref="M:BugSplatDotNet.BugSplat.Post(System.Exception)"/>, called from inside a <c>catch</c>,
+                 writes a minidump at the throw site without terminating the process.
+            
+             BugSplat.dll, BugSplatMonitor.exe, BugSplatReporter.exe and BugSplatWer.dll must sit next to the
+             application executable at run time, built for the architecture the process runs as. The
+             BugSplat NuGet package ships x86, x64 and ARM64 and copies the matching set; the SDK
+             download ships x64, so an app using it must run as a 64-bit process (a .NET Framework app
+             needs <c>PlatformTarget=x64</c>: AnyCPU with Prefer32Bit runs as 32-bit).
+             </summary>
+        </member>
+        <member name="M:BugSplatDotNet.BugSplat.#ctor(System.String,System.String,System.String)">
+            <summary>Initializes crash reporting for the given app.</summary>
+            <exception cref="T:System.ArgumentException">A required argument is null or empty.</exception>
+            <exception cref="T:System.InvalidOperationException">Native initialization failed (already initialized).</exception>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.IsInitialized">
+            <summary>True once native crash reporting is installed for this process.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.IsWerEnabled">
+            <summary>
+            True when BugSplat's WER runtime-exception helper (BugSplatWer.dll) is registered, i.e.
+            crashes that bypass the in-process filter — fail-fasts, and crashes in packaged/WinUI 3
+            apps — will be captured. Registration requires an allowlist entry naming BugSplatWer.dll
+            under <c>HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\RuntimeExceptionHelperModules</c>
+            (created with administrator rights). When this is false, those crashes are NOT reported;
+            WinUI 3 apps in particular should surface a warning (see the MyDotNetWinUI3Crasher sample).
+            </summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.User">
+            <summary>Default 'user' on reports. The native crash dialog may override it.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.Email">
+            <summary>Default 'email' on reports. The native crash dialog may override it.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.Key">
+            <summary>Default 'key' field stamped on reports.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.Description">
+            <summary>Default 'description' on reports. The native crash dialog may override it.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.Notes">
+            <summary>Default 'notes' field; editable in the BugSplat web app.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.QuietMode">
+            <summary>Suppress the native crash dialog (still uploads). Useful for services/CI.</summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.CrashDialogLinkDomains">
+            <summary>
+            The domains the crash dialog may link to, for example <c>{ "example.com" }</c>. Links in
+            the dialog's text come from its theme's string files, but they only work for these
+            domains and their subdomains, and only as https links; anything else is shown as plain
+            text. By default no domain is allowed. Null or empty allows none.
+            </summary>
+        </member>
+        <member name="P:BugSplatDotNet.BugSplat.MiniDumpType">
+            <summary>
+            The <c>MINIDUMP_TYPE</c> used for crash dumps and for <see cref="M:BugSplatDotNet.BugSplat.Post(System.Exception)"/>.
+            Defaults to <see cref="F:BugSplatDotNet.MiniDumpType.Normal"/>, which is enough for BugSplat to name the
+            managed frames with file and line. Set it before a crash occurs (e.g. right after
+            construction). <see cref="F:BugSplatDotNet.MiniDumpType.WithFullMemory"/> works but produces very large
+            dumps, and BugSplatMonitor only writes it when full dumps are enabled for the application.
+            </summary>
+        </member>
+        <member name="M:BugSplatDotNet.BugSplat.SetAttribute(System.String,System.String)">
+            <summary>Adds a custom attribute to every report.</summary>
+        </member>
+        <member name="M:BugSplatDotNet.BugSplat.AddAttachment(System.String)">
+            <summary>Attaches a file to every report. Returns false on failure.</summary>
+        </member>
+        <member name="M:BugSplatDotNet.BugSplat.Post(System.Exception)">
+             <summary>
+             Reports a handled exception as a minidump and uploads it; the process keeps running.
+             Call it from inside the <c>catch</c> block that caught <paramref name="exception"/>:
+             the dump is taken while the exception is being handled, so its throw-site frames are
+             still on the stack and BugSplat shows them with file and line, like a crash. Called
+             anywhere else there is no exception in flight and nothing is reported.
+             Blocks while the report is written and, in quiet mode, uploaded. With the crash dialog
+             it returns once the user has answered it, and the upload finishes in the background.
+            
+             On 32-bit .NET Framework the runtime has already unwound the stack when a <c>catch</c>
+             block runs, so the report shows where the exception was caught rather than where it was
+             thrown. To keep the throw site there, call <c>Post</c> from an exception filter instead:
+             <c>catch (Exception ex) when (Report(ex))</c>, with <c>Report</c> calling <c>Post</c> and
+             returning true.
+             </summary>
+             <returns>True if the BugSplat monitor took the report.</returns>
+        </member>
+        <member name="M:BugSplatDotNet.BugSplat.PostFromCurrentContext">
+            <summary>
+            Posts a dump of the calling thread as it stands, for when the runtime no longer has the
+            exception's pointers: this thread's registers, described by an exception record carrying
+            the CLR's exception code. The minidump is written from those structures while this method
+            blocks, so they only have to live until it returns.
+            </summary>
+        </member>
+        <member name="M:BugSplatDotNet.BugSplat.PostFeedback(System.String,System.String,System.String[])">
+            <summary>Posts user feedback and returns the BugSplat report id + info URL.</summary>
+        </member>
+        <member name="T:BugSplatDotNet.FeedbackResult">
+            <summary>Result of <see cref="M:BugSplatDotNet.BugSplat.PostFeedback(System.String,System.String,System.String[])"/>.</summary>
+        </member>
+        <member name="M:BugSplatDotNet.FeedbackResult.#ctor(System.Boolean,System.Int32,System.String)">
+            <summary>Result of <see cref="M:BugSplatDotNet.BugSplat.PostFeedback(System.String,System.String,System.String[])"/>.</summary>
+        </member>
+        <member name="T:BugSplatDotNet.MiniDumpType">
+            <summary>
+            Windows <c>MINIDUMP_TYPE</c> flags (declared in DbgHelp.h) that control how much process
+            state a captured crash dump contains. Combine values with the bitwise-or operator.
+            </summary>
+            <remarks>
+            Only the subset relevant to BugSplatDotNet is declared here. The full enumeration is at
+            https://learn.microsoft.com/windows/win32/api/minidumpapiset/ne-minidumpapiset-minidump_type.
+            </remarks>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.Normal">
+            <summary>Thread stacks and the module list only — the smallest dump, and the default. Enough for BugSplat to name the managed frames with file and line.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithDataSegs">
+            <summary>Include every module's writable data sections (global variables) — e.g. the CLR's live globals.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithFullMemory">
+            <summary>Include all committed memory. Produces very large dumps; avoid for routine crash capture.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithHandleData">
+            <summary>Include the process handle table.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithUnloadedModules">
+            <summary>Include modules that were unloaded before the crash.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithProcessThreadData">
+            <summary>Include thread environment (TEB/PEB) data.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithPrivateReadWriteMemory">
+            <summary>
+            Include private read-write committed memory, including the CLR's loader/JIT heaps and the
+            GC heap. Dumps grow with the process's memory use (tens of MB and up), and BugSplatMonitor
+            only writes them when full dumps are enabled for the application.
+            </summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithFullMemoryInfo">
+            <summary>Include virtual-memory region layout information (region bounds, not contents).</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithThreadInfo">
+            <summary>Include per-thread timing and start-address information.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.IgnoreInaccessibleMemory">
+            <summary>Skip memory pages that cannot be read rather than failing the whole dump.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithTokenInformation">
+            <summary>Include process/thread token (security) information.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.WithModuleHeaders">
+            <summary>Include each module's PE headers.</summary>
+        </member>
+        <member name="F:BugSplatDotNet.MiniDumpType.FilterTriage">
+            <summary>Scrub the dump for triage (heapless, strips module paths/PII). Not recommended for managed analysis.</summary>
+        </member>
+    </members>
+</doc>
